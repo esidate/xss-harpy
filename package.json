@@ -1,0 +1,23 @@
+{
+  "name": "xss-harpy",
+  "version": "1.0.0",
+  "description": "Newbie XSS DAST Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esidate/xss-harpy.git"
+  },
+  "author": "esidate",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/esidate/xss-harpy/issues"
+  },
+  "homepage": "https://github.com/esidate/xss-harpy#readme",
+  "dependencies": {
+    "puppeteer": "^5.5.0"
+  }
+}
