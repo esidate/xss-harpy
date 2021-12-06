@@ -2,7 +2,7 @@
 
 Newbie XSS DAST Bot
 
-Fill `urls` file
+Create a file with the name `urls` and fill it
 
 ```
 npm i
