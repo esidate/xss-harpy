@@ -44,7 +44,10 @@ async function startBrowser() {
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: false,
+      headless:
+        process.argv.length >= 2 && process.argv[2] === "--verbose"
+          ? false
+          : true,
       args: ["--disable-setuid-sandbox"],
       ignoreHTTPSErrors: true,
     });
@@ -70,7 +73,7 @@ const pageScraper = async (browser, url, payload) => {
 
   page.on("dialog", async (dialog) => {
     if (dialog._message === "1") {
-      console.log("[Success] Found one! [url] ", url, "[Payload]", payload);
+      console.log("\n[Success] Found one! [url] ", url, "[Payload]", payload);
       fs.appendFile("result", url + " " + payload + "\n", function (err) {
         if (err) throw err;
       });
@@ -107,26 +110,94 @@ const pageScraper = async (browser, url, payload) => {
   const inputsLen = inputs.length;
   const buttonsLen = buttons.length;
 
-    console.log("inputsLen", inputsLen);
-  //   console.log("buttonsLen", buttonsLen);
+  // console.log("inputsLen", inputsLen);
+  // console.log("buttonsLen", buttonsLen);
 
   if (inputsLen === 0) {
     shouldBreak = true;
     await browser.close();
   }
-  for (let j = 0; j < buttonsLen; j++) {
+
+  if (buttonsLen > 0) {
+    for (let j = 0; j < buttonsLen; j++) {
+      for (let k = 0; k < inputsLen; k++) {
+        try {
+          await inputs[k].focus();
+          await inputs[k].click();
+          await page.keyboard.down("Control");
+          await page.keyboard.down("A");
+          await page.keyboard.up("Control");
+          await page.keyboard.up("A");
+          await page.keyboard.press("ArrowLeft");
+          await inputs[k].type(payload);
+        } catch (_) {
+          if (
+            (_.message ===
+              "Protocol error (Input.dispatchKeyEvent): Target closed." ||
+              _.message ===
+                "Protocol error (Runtime.callFunctionOn): Session closed. Most likely the page has been closed.") &&
+            shouldBreak
+          ) {
+            // console.log("\n[Info] [Input] Closed");
+          } else if (
+            _.message === "Node is either not visible or not an HTMLElement"
+          ) {
+          } else {
+            console.log("\n[Error] [Input]", _);
+          }
+        }
+        process.stdout.write(".");
+      }
+      try {
+        await buttons[j].focus();
+        await buttons[j].click();
+      } catch (_) {
+        if (
+          (_.message ===
+            "Protocol error (Input.dispatchKeyEvent): Target closed." ||
+            _.message ===
+              "Protocol error (Runtime.callFunctionOn): Session closed. Most likely the page has been closed.") &&
+          shouldBreak
+        ) {
+          // console.log("\n[Info] [Button] Closed");
+        } else if (
+          _.message === "Node is either not visible or not an HTMLElement"
+        ) {
+        } else {
+          console.log("\n[Error] [Button]", _);
+        }
+      }
+      process.stdout.write(".");
+    }
+  } else {
     for (let k = 0; k < inputsLen; k++) {
       try {
-        // console.log("Input number: ", k);
+        await inputs[k].focus();
         await inputs[k].click();
+        await page.keyboard.down("Control");
+        await page.keyboard.down("A");
+        await page.keyboard.up("Control");
+        await page.keyboard.up("A");
+        await page.keyboard.press("ArrowLeft");
         await inputs[k].type(payload);
-      } catch (_) {}
+      } catch (_) {
+        if (
+          (_.message ===
+            "Protocol error (Input.dispatchKeyEvent): Target closed." ||
+            _.message ===
+              "Protocol error (Runtime.callFunctionOn): Session closed. Most likely the page has been closed.") &&
+          shouldBreak
+        ) {
+          // console.log("\n[Info] [Input] Closed");
+        } else if (
+          _.message === "Node is either not visible or not an HTMLElement"
+        ) {
+        } else {
+          console.log("\n[Error] [Input]", _);
+        }
+      }
+      process.stdout.write(".");
     }
-    try {
-      //   console.log("Button number: ", j);
-      await buttons[j].click();
-      // await page.evaluate(() => location.reload(true));
-    } catch (_) {}
   }
 
   // await page.waitForTimeout(5000);
@@ -140,7 +211,7 @@ async function scrapeAll() {
     for (let i = 0; i < urlsLen; i++) {
       const url = urls[i];
       if (url === "") continue;
-      console.log(`[Info] Page URL: ${url}`);
+      console.log(`\n\n\n[Info] Page URL: ${url}`);
       console.log("[Info] Hunting XSS...");
       for (let j = 0; j < payloadsLen; j++) {
         const payload = payloads[j];
