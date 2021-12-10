@@ -161,7 +161,8 @@ const pageScraper = async (browser, url, payload) => {
         ) {
           // console.log("\n[Info] [Button] Closed");
         } else if (
-          _.message === "Node is either not visible or not an HTMLElement"
+          _.message === "Node is either not visible or not an HTMLElement" ||
+          _.message === "Node is detached from document"
         ) {
         } else {
           console.log("\n[Error] [Button]", _);
@@ -207,8 +208,8 @@ const pageScraper = async (browser, url, payload) => {
 };
 
 async function scrapeAll() {
-  try {
-    for (let i = 0; i < urlsLen; i++) {
+  for (let i = 0; i < urlsLen; i++) {
+    try {
       const url = urls[i];
       if (url === "") continue;
       console.log(`\n\n\n[Info] Page URL: ${url}`);
@@ -226,9 +227,9 @@ async function scrapeAll() {
           break;
         }
       }
+    } catch (err) {
+      console.log("[Error] ", err);
     }
-  } catch (err) {
-    console.log("[Error] ", err);
   }
 }
 
